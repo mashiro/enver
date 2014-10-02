@@ -5,7 +5,7 @@ module Enver
     def load(env = ENV, &block)
       Enver::Loader.new(env) do
         instance_eval &block if block
-      end.store
+      end.attributes
     end
   end
 end

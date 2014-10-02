@@ -22,6 +22,10 @@ RSpec.describe Enver::Loader do
       'BOOLEAN10' => 'はい',
       'ARRAY1' => 'foo,bar,buzz',
       'ARRAY2' => 'foo:bar:buzz',
+      'MY_VALUE1' => 'myvalue1',
+      'MY_VALUE2' => 'myvalue2',
+      'MY_SUPER_VALUE1' => 'mysupervalue1',
+      'MY_SUPER_VALUE2' => 'mysupervalue2',
     }
   end
   let(:loader) { Enver::Loader.new(env) }
@@ -62,5 +66,22 @@ RSpec.describe Enver::Loader do
     it { expect(loader.array(:v, 'ARRAY2', pattern: ':')).to eq(['foo', 'bar', 'buzz']) }
     it { expect(loader.array(:v, 'ARRAY1', limit: 2)).to eq(['foo', 'bar,buzz']) }
   end
+
+  describe '#partial' do
+    it do
+      loader.partial :my, 'MY_' do
+        string :value1, 'VALUE1'
+        string :value2, 'VALUE2'
+        partial :super, 'SUPER_' do
+          string :value1, 'VALUE1'
+          string :value2, 'VALUE2'
+        end
+      end
+      env = loader.attributes
+      expect(env.my.value1).to eq('myvalue1')
+      expect(env.my.value2).to eq('myvalue2')
+      expect(env.my.super.value1).to eq('mysupervalue1')
+      expect(env.my.super.value2).to eq('mysupervalue2')
+    end
   end
 end

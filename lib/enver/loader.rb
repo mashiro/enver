@@ -2,17 +2,18 @@ require 'ostruct'
 
 module Enver
   class Loader
-    attr_reader :store
+    attr_reader :attributes
 
-    def initialize(env, &block)
+    def initialize(env, prefix = '', &block)
       @env = env
-      @store = OpenStruct.new
+      @prefix = prefix
+      @attributes = OpenStruct.new
       instance_eval(&block) if block
     end
 
     def value(name, env_name, options = {})
       value = fetch env_name, options
-      @store.send("#{name}=", value.is_a?(String) ? yield(value) : value)
+      store(name, value.is_a?(String) ? yield(value) : value)
     end
 
     def string(name, env_name, options = {})
@@ -48,9 +49,22 @@ module Enver
       end
     end
 
+    def partial(name, env_prefix, options = {}, &block)
+      store name, Loader.new(@env, with_prefix(env_prefix), &block).attributes
+    end
+
     private
 
+    def with_prefix(env_name)
+      "#{@prefix}#{env_name}"
+    end
+
+    def store(name, value)
+      @attributes.send("#{name}=", value)
+    end
+
     def fetch(env_name, options = {})
+      env_name = with_prefix(env_name)
       if options.has_key? :default
         @env.fetch(env_name, options[:default])
       else
