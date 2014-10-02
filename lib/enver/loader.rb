@@ -12,7 +12,7 @@ module Enver
 
     def value(name, env_name, options = {})
       value = fetch env_name, options
-      @store[name] = value.is_a?(String) ? yield(value) : value
+      @store.send("#{name}=", value.is_a?(String) ? yield(value) : value)
     end
 
     def string(name, env_name, options = {})
