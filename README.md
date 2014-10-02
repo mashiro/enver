@@ -1,4 +1,4 @@
-# Enver [![Build Status](https://travis-ci.org/mashiro/enver.png?branch=master)](https://travis-ci.org/mashiro/enver)
+# Enver [![Build Status](https://travis-ci.org/mashiro/enver.svg)](https://travis-ci.org/mashiro/enver)
 
 Minimal environment loader
 
