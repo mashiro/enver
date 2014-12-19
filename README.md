@@ -23,21 +23,21 @@ Or install it yourself as:
 ```bash
 export CLIENT_KEY=xxx
 export CLIENT_SECRET=yyy
-export SERVERS=4
+export NUM_SERVERS=4
 export NEW_RELIC_LICENSE_KEY=lisencekey
 export NEW_RELIC_APP_NAME=appname
 ```
 
 ```ruby
 env = Enver.load do
-  string :client_key, 'CLIENT_KEY'
-  string :client_secret, 'CLIENT_SECRET'
-  integer :servers, 'SERVERS'
-  array :path, 'PATH', pattern: ':'
+  string :client_key
+  string :client_secret
+  integer :servers, 'NUM_SERVERS'
+  array :path, pattern: ':'
 
-  partial :new_relic, 'NEW_RELIC_' do
-    string :license_key, 'LICENSE_KEY'
-    string :app_name, 'APP_NAME'
+  partial :new_relic do
+    string :license_key
+    string :app_name
   end
 end
 

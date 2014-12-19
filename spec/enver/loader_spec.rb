@@ -4,6 +4,7 @@ require 'spec_helper'
 RSpec.describe Enver::Loader do
   let(:env) do
     {
+      'VALUE' => 'enver',
       'STRING1' => '',
       'STRING2' => 'test',
       'INTEGER1' => '',
@@ -35,46 +36,55 @@ RSpec.describe Enver::Loader do
     it { expect(loader.send(:fetch, 'NOTHING', default: 123)).to eq(123) }
   end
 
+  describe '#value' do
+    it { expect(loader.value(:v, 'VALUE')).to eq('enver') }
+    it { expect(loader.value(:value)).to eq('enver') }
+  end
+
   describe '#string' do
-    it { expect(loader.string(:v, 'STRING1')).to eq('') }
-    it { expect(loader.string(:v, 'STRING2')).to eq('test') }
+    it { expect(loader.string(:string1)).to eq('') }
+    it { expect(loader.string(:string2)).to eq('test') }
   end
 
   describe '#integer' do
-    it { expect{loader.integer(:v, 'INTEGER1')}.to raise_error }
-    it { expect(loader.integer(:v, 'INTEGER2')).to eq(1) }
-    it { expect{loader.integer(:v, 'INTEGER3')}.to raise_error }
-    it { expect{loader.integer(:v, 'INTEGER4')}.to raise_error }
+    it { expect{loader.integer(:integer1)}.to raise_error }
+    it { expect(loader.integer(:integer2)).to eq(1) }
+    it { expect{loader.integer(:integer3)}.to raise_error }
+    it { expect{loader.integer(:integer4)}.to raise_error }
   end
 
   describe '#boolean' do
-    it { expect(loader.boolean(:v, 'BOOLEAN1')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN2')).to eq(true) }
-    it { expect(loader.boolean(:v, 'BOOLEAN3')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN4')).to eq(true) }
-    it { expect(loader.boolean(:v, 'BOOLEAN5')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN6')).to eq(true) }
-    it { expect(loader.boolean(:v, 'BOOLEAN7')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN8')).to eq(true) }
-    it { expect(loader.boolean(:v, 'BOOLEAN9')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN10')).to eq(false) }
-    it { expect(loader.boolean(:v, 'BOOLEAN10', true_values: %w(はい))).to eq(true) }
+    it { expect(loader.boolean(:boolean1)).to eq(false) }
+    it { expect(loader.boolean(:boolean2)).to eq(true) }
+    it { expect(loader.boolean(:boolean3)).to eq(false) }
+    it { expect(loader.boolean(:boolean4)).to eq(true) }
+    it { expect(loader.boolean(:boolean5)).to eq(false) }
+    it { expect(loader.boolean(:boolean6)).to eq(true) }
+    it { expect(loader.boolean(:boolean7)).to eq(false) }
+    it { expect(loader.boolean(:boolean8)).to eq(true) }
+    it { expect(loader.boolean(:boolean9)).to eq(false) }
+    it { expect(loader.boolean(:boolean10)).to eq(false) }
+    it { expect(loader.boolean(:boolean10, true_values: %w(はい))).to eq(true) }
   end
 
   describe '#array' do
-    it { expect(loader.array(:v, 'ARRAY1')).to eq(['foo', 'bar', 'buzz']) }
-    it { expect(loader.array(:v, 'ARRAY2', pattern: ':')).to eq(['foo', 'bar', 'buzz']) }
-    it { expect(loader.array(:v, 'ARRAY1', limit: 2)).to eq(['foo', 'bar,buzz']) }
+    it { expect(loader.array(:array1)).to eq(['foo', 'bar', 'buzz']) }
+    it { expect(loader.array(:array2, pattern: ':')).to eq(['foo', 'bar', 'buzz']) }
+    it { expect(loader.array(:array1, limit: 2)).to eq(['foo', 'bar,buzz']) }
   end
 
   describe '#partial' do
     it do
-      loader.partial :my, 'MY_' do
-        string :value1, 'VALUE1'
-        string :value2, 'VALUE2'
-        partial :super, 'SUPER_' do
-          string :value1, 'VALUE1'
-          string :value2, 'VALUE2'
+      loader.partial :my do
+        string :value1
+        string :value2
+        partial :super do
+          string :value1
+          string :value2
+        end
+        partial :s2, 'SUPER_' do
+          string :value1
+          string :value2
         end
       end
       env = loader.attributes
@@ -82,6 +92,8 @@ RSpec.describe Enver::Loader do
       expect(env.my.value2).to eq('myvalue2')
       expect(env.my.super.value1).to eq('mysupervalue1')
       expect(env.my.super.value2).to eq('mysupervalue2')
+      expect(env.my.s2.value1).to eq('mysupervalue1')
+      expect(env.my.s2.value2).to eq('mysupervalue2')
     end
   end
 end

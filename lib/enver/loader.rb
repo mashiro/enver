@@ -11,49 +11,63 @@ module Enver
       instance_eval(&block) if block
     end
 
-    def value(name, env_name, options = {})
+    def value(*args)
+      options = extract_options! args
+      has_default = options.key? :default
+      name = args.shift
+      env_name = args.shift || name.to_s.upcase
+
       value = fetch env_name, options
-      store(name, value.is_a?(String) ? yield(value) : value)
+      value = yield value, options if !has_default && block_given?
+
+      store name, value
     end
 
-    def string(name, env_name, options = {})
-      value(name, env_name, options) do |v|
+    def string(*args)
+      value(*args) do |v|
         v
       end
     end
 
-    def integer(name, env_name, options = {})
-      value(name, env_name, options) do |v|
+    def integer(*args)
+      value(*args) do |v|
         Integer(v)
       end
     end
 
-    def float(name, env_name, options = {})
-      value(name, env_name, options) do |v|
+    def float(*args)
+      value(*args) do |v|
         Float(v)
       end
     end
 
-    def boolean(name, env_name, options = {})
-      value(name, env_name, options) do |v|
+    def boolean(*args)
+      value(*args) do |v, options|
         true_values = options[:true_values] || %w(1 t true y yes)
         true_values.include?(v)
       end
     end
 
-    def array(name, env_name, options = {})
-      value(name, env_name, options) do |v|
+    def array(*args)
+      value(*args) do |v, options|
         pattern = options[:pattern] || ','
         limit = options[:limit] || 0
         v.split(pattern, limit)
       end
     end
 
-    def partial(name, env_prefix, options = {}, &block)
+    def partial(*args, &block)
+      options = extract_options! args
+      name = args.shift
+      env_prefix = args.shift || "#{name.to_s.upcase}_"
       store name, Loader.new(@env, with_prefix(env_prefix), &block).attributes
     end
 
     private
+
+    def extract_options!(args)
+      args.last.is_a?(::Hash) ? args.pop : {}
+    end
 
     def with_prefix(env_name)
       "#{@prefix}#{env_name}"
